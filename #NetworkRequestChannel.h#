@@ -1,0 +1,31 @@
+
+#ifndef NETWORK_REQ_CHAN_H                   
+#define NETWORK_REQ_CHAN_H
+
+
+#include <pthread.h>
+
+class NetworkReqChan {
+private:
+  lsint             value;
+  pthread_mutex_t m;
+  pthread_cond_t  c;
+
+public:
+  NetworkRequestChannel(const string server_host_name,
+			const unsigned short port_no);
+
+  NetworkRequestChannel(const unsigned short port_no, 
+			void* (*connection_handler) (int*));
+
+  ~NetworkRequestChannel();
+  string send_request(string request);
+  string cread();
+
+  int cwrite(string msg);
+};
+
+
+#endif
+
+
