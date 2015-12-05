@@ -31,7 +31,13 @@
 #include <unistd.h>
 #include <stdlib.h>
 
+#include <stdio.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <string.h>
+
 #include "reqchannel.h"
+#include "NetworkRequestChannel.h"
 
 using namespace std;
 
@@ -52,6 +58,9 @@ using namespace std;
 /*--------------------------------------------------------------------------*/
 
 static int nthreads = 0;
+
+int p = 13370; // port number for data server
+int b = 20; // backlog of the server socket
 
 /*--------------------------------------------------------------------------*/
 /* FORWARDS */
@@ -168,6 +177,36 @@ void handle_process_loop(RequestChannel & _channel) {
   
 }
 
+void* connection_handler(void* farg) {
+  int sock = *(int*) farg;
+  char buf[1024];
+  string strbuf;
+  
+  string msg;
+  while (true) {
+    recv(sock, buf, sizeof(buf), 0);
+    printf("server: recieved msg: %s\n", buf);
+
+    strbuf = buf;
+    if (strbuf == "quit") {break;}
+    else if (strbuf == "hello" || strbuf == "Hello") {
+      msg = "hello to you too";
+      if (send(sock, msg.c_str(), msg.size() + 1, 0) == -1) {perror("send");}
+    }
+    else if (strbuf.substr(0, 4) == "data") {
+      usleep(1000 + (rand() % 5000));
+      //_channel.cwrite(int2string(rand() % 100));
+      msg = int2string(rand() % 100);
+      if (send(sock, msg.c_str(), strlen(msg.c_str()) + 1, 0) == -1) {perror("send");}
+    }
+    else {
+      msg = "unknown string was: " + strbuf;
+      if (send(sock, msg.c_str(), strlen(msg.c_str()) + 1, 0) == -1) {perror("send");}
+    }
+  }
+  close(sock);
+}
+
 /*--------------------------------------------------------------------------*/
 /* MAIN FUNCTION */
 /*--------------------------------------------------------------------------*/
@@ -175,9 +214,32 @@ void handle_process_loop(RequestChannel & _channel) {
 int main(int argc, char * argv[]) {
 
   //  cout << "Establishing control channel... " << flush;
-  RequestChannel control_channel("control", RequestChannel::SERVER_SIDE);
+  //  RequestChannel control_channel("control", RequestChannel::SERVER_SIDE);
   //  cout << "done.\n" << flush;
 
-  handle_process_loop(control_channel);
+  //handle_process_loop(control_channel);
 
+  char c;
+  opterr = 0;
+  
+  while ((c = getopt(argc, argv, "p:b:")) != -1) {
+    switch(c) {
+    case 'p':
+      p = atoi(optarg);
+      break;
+    case 'b':
+      b = atoi(optarg);
+      break;
+    default:
+      cout << "flag H for help" << endl;
+      cout << "flag p for port no for data server" << endl;
+      cout << "flag b for backlog of server socket" << endl;
+      abort();
+    }
+  }
+
+  // App code here
+  cout << "Starting server using port " << p << endl;
+  NetworkRequestChannel chan(p, connection_handler);
+  
 }

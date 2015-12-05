@@ -68,7 +68,8 @@ listen
 while(1){hs=accept(); pthreadcreate(connectionhandler, hs)}
 */
 NetworkRequestChannel::NetworkRequestChannel(const unsigned short port_no, 
-		      void* (*connection_handler) (int*)) {
+		      void* (*connection_handler) (void*)) {
+  //                                          was  int*
   int sockfd, new_fd, rv;
   struct addrinfo hints, *serv; // listen on sock_Fd, new conn on new_fd;
   struct sockaddr_storage their_addr; // connector's addr
@@ -119,7 +120,8 @@ NetworkRequestChannel::NetworkRequestChannel(const unsigned short port_no,
       continue;
     }
     
-    pthread_create(&thread, (pthread_attr_t*) connection_handler, (void*) new_fd);
+    pthread_create(&thread, NULL, connection_handler, (void*) new_fd);
+    //pthread_create(&thread, NULL, (pthread_attr_t*) connection_handler, (void*) new_fd);
   }
 }
 

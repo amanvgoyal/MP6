@@ -15,7 +15,8 @@ public:
 			const unsigned short port_no);
 
   NetworkRequestChannel(const unsigned short port_no, 
-			void* (*connection_handler) (int*));
+			void* (*connection_handler) (void*));
+  //                                          was    int*
 
   ~NetworkRequestChannel();
 std::string send_request(std::string request);

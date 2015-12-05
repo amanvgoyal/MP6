@@ -14,8 +14,8 @@ semaphore.o: semaphore.h semaphore.cpp
 BoundedBuffer.o: BoundedBuffer.h BoundedBuffer.cpp
 	g++-4.7 -c -g BoundedBuffer.cpp
 
-dataserver: dataserver.cpp reqchannel.o 
-	g++-4.7 -g -o dataserver dataserver.cpp reqchannel.o -lpthread
+dataserver: dataserver.cpp reqchannel.o NetworkRequestChannel.o
+	g++-4.7 -g -o dataserver dataserver.cpp reqchannel.o NetworkRequestChannel.o -lpthread
 
 client: client.cpp reqchannel.o NetworkRequestChannel.o semaphore.o BoundedBuffer.o
 	g++-4.7 -std=c++11 -pthread -g -o client client.cpp reqchannel.o NetworkRequestChannel.o semaphore.o BoundedBuffer.o

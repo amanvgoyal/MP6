@@ -169,7 +169,7 @@ void* stat_thread(void* id){
 int main(int argc, char * argv[]) {
   opterr = 0;
   
-  while ((c = getopt(argc, argv, "n:b:w:h:p")) != -1) {
+  while ((c = getopt(argc, argv, "n:b:w:h:p:")) != -1) {
     switch(c) {
     case 'n':
       n = atoi(optarg);
